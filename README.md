@@ -1,6 +1,6 @@
 # StatTracker
 
-StatTracker is a Rust plugin that tracks various player statistics and stores them in a local or remote database. This allows server admins and players to monitor their performance over time.
+StatTracker is a Rust plugin that tracks various player statistics and stores them in a local or remote database. This allows server admins and players to monitor their performance over time. The plugin also posts the players stats to discord via a webhook.
 
 ## Author
 
@@ -66,7 +66,8 @@ WebhookUrl: `The Discord webhook URL to post the top 5 player stats every 12 hou
   "Port": 3306,
   "Database": "rust",
   "User": "root",
-  "Password": "password"
+  "Password": "password",
+  "WebhookUrl": ""
 }
 ```
 
