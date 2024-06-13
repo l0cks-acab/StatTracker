@@ -1,9 +1,13 @@
 using System.Collections.Generic;
+using System.Linq;
 using Oxide.Core;
 using Oxide.Core.Plugins;
 using Oxide.Core.Libraries.Covalence;
 using UnityEngine;
 using MySql.Data.MySqlClient;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Oxide.Plugins
 {
@@ -13,6 +17,7 @@ namespace Oxide.Plugins
     {
         private Dictionary<string, PlayerData> playerStats;
         private Configuration config;
+        private Timer webhookTimer;
 
         private class Configuration
         {
@@ -22,6 +27,7 @@ namespace Oxide.Plugins
             public string Database { get; set; }
             public string User { get; set; }
             public string Password { get; set; }
+            public string WebhookUrl { get; set; }
         }
 
         protected override void LoadDefaultConfig()
@@ -33,7 +39,8 @@ namespace Oxide.Plugins
                 Port = 3306,
                 Database = "rust",
                 User = "root",
-                Password = "password"
+                Password = "password",
+                WebhookUrl = ""
             };
             SaveConfig();
         }
@@ -43,11 +50,17 @@ namespace Oxide.Plugins
             config = Config.ReadObject<Configuration>();
             LoadData();
             permission.RegisterPermission("stattracker.admin", this);
+
+            if (!string.IsNullOrEmpty(config.WebhookUrl))
+            {
+                webhookTimer = timer.Every(43200, () => SendTopKillsToDiscord()); // 43200 seconds = 12 hours
+            }
         }
 
         private void Unload()
         {
             SaveData();
+            webhookTimer?.Destroy();
         }
 
         private void OnServerSave()
@@ -304,6 +317,39 @@ namespace Oxide.Plugins
                 {
                     cmd.ExecuteNonQuery();
                 }
+            }
+        }
+
+        private void SendTopKillsToDiscord()
+        {
+            var topPlayers = playerStats.OrderByDescending(p => p.Value.PVPKills).Take(5);
+            var message = new StringBuilder();
+            message.AppendLine("Top 5 Players by Kills:");
+            int rank = 1;
+            foreach (var player in topPlayers)
+            {
+                var playerName = covalence.Players.FindPlayerById(player.Key)?.Name ?? player.Key;
+                message.AppendLine($"{rank}. {playerName} - {player.Value.PVPKills} kills");
+                rank++;
+            }
+            PostToDiscord(message.ToString());
+        }
+
+        private async void PostToDiscord(string message)
+        {
+            if (string.IsNullOrEmpty(config.WebhookUrl)) return;
+
+            using (var httpClient = new HttpClient())
+            {
+                var payload = new
+                {
+                    content = message
+                };
+
+                var jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                await httpClient.PostAsync(config.WebhookUrl, content);
             }
         }
     }
