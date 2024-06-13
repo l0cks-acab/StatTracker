@@ -56,6 +56,8 @@ User: `The MySQL database user.`
 
 Password: `The MySQL database password.`
 
+WebhookUrl: `The Discord webhook URL to post the top 5 player stats every 12 hours.`
+
 ## Default Configuration
 ```json
 {
