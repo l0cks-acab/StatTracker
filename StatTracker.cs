@@ -7,13 +7,12 @@ using UnityEngine;
 using MySql.Data.MySqlClient;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using global::Rust;
 
 namespace Oxide.Plugins
 {
-    [Info("StatTracker", "locks", "1.5.0")]
+    [Info("StatTracker", "locks", "1.0.0")]
     [Description("Tracks various player statistics and stores them in a local or remote database.")]
     public class StatTracker : CovalencePlugin
     {
@@ -30,11 +29,12 @@ namespace Oxide.Plugins
             public string User { get; set; }
             public string Password { get; set; }
             public string WebhookUrl { get; set; }
+            public int WebhookInterval { get; set; } // Interval in minutes
         }
 
         protected override void LoadDefaultConfig()
         {
-            config = new Configuration
+            Config.WriteObject(new Configuration
             {
                 UseRemoteDatabase = false,
                 Host = "localhost",
@@ -42,20 +42,27 @@ namespace Oxide.Plugins
                 Database = "rust",
                 User = "root",
                 Password = "password",
-                WebhookUrl = ""
-            };
-            SaveConfig();
+                WebhookUrl = "",
+                WebhookInterval = 720 // Default to 12 hours
+            }, true);
         }
 
         private void Init()
         {
             config = Config.ReadObject<Configuration>();
+            if (config == null)
+            {
+                LoadDefaultConfig();
+                config = Config.ReadObject<Configuration>();
+                SaveConfig();
+            }
+
             LoadData();
             permission.RegisterPermission("stattracker.admin", this);
 
             if (!string.IsNullOrEmpty(config.WebhookUrl))
             {
-                webhookTimer = timer.Every(43200, () => SendTopKillsToDiscord()); // 43200 seconds = 12 hours
+                webhookTimer = timer.Every(config.WebhookInterval * 60, () => SendTopKillsToDiscord()); // Convert minutes to seconds
             }
         }
 
@@ -311,6 +318,19 @@ namespace Oxide.Plugins
             }
             SaveData();
             player.Reply($"Stats for player with ID {targetId} have been reset.");
+        }
+
+        [Command("pushstats", "stattracker.admin")]
+        private void PushStatsCommand(IPlayer player, string command, string[] args)
+        {
+            if (!player.IsAdmin && !permission.UserHasPermission(player.Id, "stattracker.admin"))
+            {
+                player.Reply("You do not have permission to use this command.");
+                return;
+            }
+
+            SendTopKillsToDiscord();
+            player.Reply("Top kills stats have been pushed to the Discord webhook.");
         }
 
         private void DeleteStatsFromRemoteDatabase(string playerId)
