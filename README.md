@@ -32,6 +32,8 @@ StatTracker tracks and stores the following player statistics:
 
 `/resetstats <steam64ID>` - Allows admins to delete a player's statistics using their Steam64ID.
 
+`/pushstats` - Allows admins to forcefully push the stats to the webhook.
+
 ## Permissions
 
 The following permission is used by StatTracker:
