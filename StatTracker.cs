@@ -5,13 +5,15 @@ using Oxide.Core.Plugins;
 using Oxide.Core.Libraries.Covalence;
 using UnityEngine;
 using MySql.Data.MySqlClient;
-using System.Net.Http;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using global::Rust;
 
 namespace Oxide.Plugins
 {
-    [Info("StatTracker", "locks", "1.0.0")]
+    [Info("StatTracker", "locks", "1.5.0")]
     [Description("Tracks various player statistics and stores them in a local or remote database.")]
     public class StatTracker : CovalencePlugin
     {
@@ -175,7 +177,7 @@ namespace Oxide.Plugins
 
         private void OnPlayerDeath(BasePlayer player, HitInfo info)
         {
-            var data = GetPlayerData(player);
+            var data = GetPlayerData(player.UserIDString);
 
             if (info.Initiator != null && info.Initiator.ToPlayer() != null)
             {
@@ -213,7 +215,7 @@ namespace Oxide.Plugins
 
         private void OnPlayerSleepEnded(BasePlayer player)
         {
-            var data = GetPlayerData(player);
+            var data = GetPlayerData(player.UserIDString);
             data.TimePlayed += player.lifeStory.secondsAlive;
         }
 
@@ -224,7 +226,7 @@ namespace Oxide.Plugins
                 if (info.Initiator != null && info.Initiator.ToPlayer() != null)
                 {
                     var killer = info.Initiator.ToPlayer();
-                    var data = GetPlayerData(killer);
+                    var data = GetPlayerData(killer.UserIDString);
                     data.PVEKills++;
                 }
             }
@@ -232,22 +234,27 @@ namespace Oxide.Plugins
 
         private void OnRocketLaunched(BasePlayer player, BaseEntity entity)
         {
-            var data = GetPlayerData(player);
+            var data = GetPlayerData(player.UserIDString);
             data.RocketsLaunched++;
         }
 
         private void OnPlayerRespawned(BasePlayer player)
         {
-            if (player.lastDeathReason == BaseNetworkable.DeathReason.Suicide)
+            if (player.lastDamage == DamageType.Suicide)
             {
-                var data = GetPlayerData(player);
+                var data = GetPlayerData(player.UserIDString);
                 data.Suicides++;
             }
         }
 
-        private PlayerData GetPlayerData(IPlayer player)
+        private PlayerData GetPlayerData(string playerId)
         {
-            return playerStats[player.Id];
+            if (!playerStats.TryGetValue(playerId, out var data))
+            {
+                data = new PlayerData();
+                playerStats[playerId] = data;
+            }
+            return data;
         }
 
         [Command("stats")]
@@ -259,7 +266,7 @@ namespace Oxide.Plugins
                 return;
             }
 
-            var data = GetPlayerData(player);
+            var data = GetPlayerData(player.Id);
             player.Reply($"Stats for {player.Name}:\n" +
                          $"PVPKills: {data.PVPKills}\n" +
                          $"PVPDistance: {data.PVPDistance}\n" +
@@ -335,11 +342,11 @@ namespace Oxide.Plugins
             PostToDiscord(message.ToString());
         }
 
-        private async void PostToDiscord(string message)
+        private void PostToDiscord(string message)
         {
             if (string.IsNullOrEmpty(config.WebhookUrl)) return;
 
-            using (var httpClient = new HttpClient())
+            using (var webClient = new WebClient())
             {
                 var payload = new
                 {
@@ -347,9 +354,8 @@ namespace Oxide.Plugins
                 };
 
                 var jsonPayload = JsonConvert.SerializeObject(payload);
-                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-
-                await httpClient.PostAsync(config.WebhookUrl, content);
+                webClient.Headers[HttpRequestHeader.ContentType] = "application/json";
+                webClient.UploadString(config.WebhookUrl, jsonPayload);
             }
         }
     }
