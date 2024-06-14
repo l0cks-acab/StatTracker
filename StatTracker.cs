@@ -289,7 +289,7 @@ namespace Oxide.Plugins
                          $"TimePlayed: {data.TimePlayed} seconds");
         }
 
-        [Command("resetstats", "stattracker.admin")]
+        [Command("resetstats")]
         private void ResetStatsCommand(IPlayer player, string command, string[] args)
         {
             if (!player.IsAdmin && !permission.UserHasPermission(player.Id, "stattracker.admin"))
@@ -320,7 +320,7 @@ namespace Oxide.Plugins
             player.Reply($"Stats for player with ID {targetId} have been reset.");
         }
 
-        [Command("pushstats", "stattracker.admin")]
+        [Command("pushstats")]
         private void PushStatsCommand(IPlayer player, string command, string[] args)
         {
             if (!player.IsAdmin && !permission.UserHasPermission(player.Id, "stattracker.admin"))
