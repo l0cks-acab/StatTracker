@@ -40,26 +40,6 @@ The following permission is used by StatTracker:
 
 `stattracker.admin` - Required to use the /resetstats & /pushstats commands.
 
-## Configuration
-
-The plugin can be configured to use either a local file or a remote MySQL database to store player statistics. The default configuration uses a local file.
-
-Configuration Options
-
-UseRemoteDatabase: `True or False`
-
-Host: `The MySQL server host.`
-
-Port: `The MySQL server port.`
-
-Database: `The MySQL database name.`
-
-User: `The MySQL database user.`
-
-Password: `The MySQL database password.`
-
-WebhookUrl: `The Discord webhook URL to post the top 5 player stats every 12 hours.`
-
 ## Default Configuration
 ```json
 {
