@@ -38,7 +38,7 @@ StatTracker tracks and stores the following player statistics:
 
 The following permission is used by StatTracker:
 
-`stattracker.admin` - Required to use the /resetstats command.
+`stattracker.admin` - Required to use the /resetstats & /pushstats commands.
 
 ## Configuration
 
