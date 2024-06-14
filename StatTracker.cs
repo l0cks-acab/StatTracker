@@ -351,7 +351,6 @@ namespace Oxide.Plugins
         {
             var topPlayers = playerStats.OrderByDescending(p => p.Value.PVPKills).Take(5);
             var message = new StringBuilder();
-            message.AppendLine("Top 5 Players by Kills:");
             int rank = 1;
             foreach (var player in topPlayers)
             {
@@ -368,9 +367,22 @@ namespace Oxide.Plugins
 
             using (var webClient = new WebClient())
             {
+                var embed = new
+                {
+                    author = new
+                    {
+                        name = "Stat Tracker"
+                    },
+                    description = message,
+                    footer = new
+                    {
+                        text = "developed by herbs.acab"
+                    }
+                };
+
                 var payload = new
                 {
-                    content = message
+                    embeds = new[] { embed }
                 };
 
                 var jsonPayload = JsonConvert.SerializeObject(payload);
