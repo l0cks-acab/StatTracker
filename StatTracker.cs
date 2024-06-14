@@ -32,6 +32,22 @@ namespace Oxide.Plugins
             public int WebhookInterval { get; set; } // Interval in minutes
         }
 
+        private class PlayerData
+        {
+            public int PVPKills { get; set; }
+            public float PVPDistance { get; set; }
+            public int PVEKills { get; set; }
+            public int SleepersKilled { get; set; }
+            public int HeadShots { get; set; }
+            public int Deaths { get; set; }
+            public int Suicides { get; set; }
+            public float KDR { get; set; }
+            public int HeliKills { get; set; }
+            public int APCKills { get; set; }
+            public int RocketsLaunched { get; set; }
+            public double TimePlayed { get; set; }
+        }
+
         protected override void LoadDefaultConfig()
         {
             Config.WriteObject(new Configuration
@@ -156,22 +172,6 @@ namespace Oxide.Plugins
                     }
                 }
             }
-        }
-
-        private class PlayerData
-        {
-            public int PVPKills { get; set; }
-            public float PVPDistance { get; set; }
-            public int PVEKills { get; set; }
-            public int SleepersKilled { get; set; }
-            public int HeadShots { get; set; }
-            public int Deaths { get; set; }
-            public int Suicides { get; set; }
-            public float KDR { get; set; }
-            public int HeliKills { get; set; }
-            public int APCKills { get; set; }
-            public int RocketsLaunched { get; set; }
-            public double TimePlayed { get; set; }
         }
 
         private void OnPlayerInit(IPlayer player)
