@@ -4,7 +4,7 @@ StatTracker is a Rust plugin that tracks various player statistics and stores th
 
 ## Author
 
-- Plugin developed by **locks**
+- Plugin developed by **herbs.acab**
 
 ## Version
 
