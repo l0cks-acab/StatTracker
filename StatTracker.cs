@@ -184,6 +184,8 @@ namespace Oxide.Plugins
 
         private void OnPlayerDeath(BasePlayer player, HitInfo info)
         {
+            if (player == null || info == null) return;
+
             var data = GetPlayerData(player.UserIDString);
 
             if (info.Initiator != null && info.Initiator.ToPlayer() != null)
@@ -222,12 +224,16 @@ namespace Oxide.Plugins
 
         private void OnPlayerSleepEnded(BasePlayer player)
         {
+            if (player == null) return;
+
             var data = GetPlayerData(player.UserIDString);
             data.TimePlayed += player.lifeStory.secondsAlive;
         }
 
         private void OnEntityDeath(BaseCombatEntity entity, HitInfo info)
         {
+            if (entity == null || info == null) return;
+
             if (entity is BasePlayer player)
             {
                 if (info.Initiator != null && info.Initiator.ToPlayer() != null)
@@ -241,12 +247,16 @@ namespace Oxide.Plugins
 
         private void OnRocketLaunched(BasePlayer player, BaseEntity entity)
         {
+            if (player == null) return;
+
             var data = GetPlayerData(player.UserIDString);
             data.RocketsLaunched++;
         }
 
         private void OnPlayerRespawned(BasePlayer player)
         {
+            if (player == null) return;
+
             if (player.lastDamage == DamageType.Suicide)
             {
                 var data = GetPlayerData(player.UserIDString);
