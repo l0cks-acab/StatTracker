@@ -289,6 +289,40 @@ namespace Oxide.Plugins
                          $"TimePlayed: {data.TimePlayed} seconds");
         }
 
+        [Command("lookup")]
+        private void LookupCommand(IPlayer player, string command, string[] args)
+        {
+            if (args.Length != 1)
+            {
+                player.Reply("Usage: /lookup <playerName|steamID>");
+                return;
+            }
+
+            var targetId = args[0];
+            IPlayer targetPlayer = covalence.Players.FindPlayer(targetId);
+
+            if (targetPlayer == null)
+            {
+                player.Reply($"Player '{targetId}' not found.");
+                return;
+            }
+
+            var data = GetPlayerData(targetPlayer.Id);
+            player.Reply($"Stats for {targetPlayer.Name} ({targetPlayer.Id}):\n" +
+                         $"PVPKills: {data.PVPKills}\n" +
+                         $"PVPDistance: {data.PVPDistance}\n" +
+                         $"PVEKills: {data.PVEKills}\n" +
+                         $"SleepersKilled: {data.SleepersKilled}\n" +
+                         $"HeadShots: {data.HeadShots}\n" +
+                         $"Deaths: {data.Deaths}\n" +
+                         $"Suicides: {data.Suicides}\n" +
+                         $"KDR: {data.KDR}\n" +
+                         $"HeliKills: {data.HeliKills}\n" +
+                         $"APCKills: {data.APCKills}\n" +
+                         $"RocketsLaunched: {data.RocketsLaunched}\n" +
+                         $"TimePlayed: {data.TimePlayed} seconds");
+        }
+
         [Command("resetstats")]
         private void ResetStatsCommand(IPlayer player, string command, string[] args)
         {
@@ -354,8 +388,9 @@ namespace Oxide.Plugins
             int rank = 1;
             foreach (var player in topPlayers)
             {
-                var playerName = covalence.Players.FindPlayerById(player.Key)?.Name ?? player.Key;
-                message.AppendLine($"{rank}. {playerName} - {player.Value.PVPKills} kills");
+                var steamId = player.Key;
+                var playerName = covalence.Players.FindPlayerById(player.Key)?.Name ?? "Unknown";
+                message.AppendLine($"{rank}. {playerName} ({steamId}) - {player.Value.PVPKills} kills");
                 rank++;
             }
             PostToDiscord(message.ToString());
