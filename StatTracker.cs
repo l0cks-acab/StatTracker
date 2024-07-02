@@ -30,6 +30,8 @@ namespace Oxide.Plugins
             public string Password { get; set; }
             public string WebhookUrl { get; set; }
             public int WebhookInterval { get; set; } // Interval in minutes
+            public string TableName { get; set; }
+            public string LBTableName { get; set; }
         }
 
         private class PlayerData
@@ -59,7 +61,9 @@ namespace Oxide.Plugins
                 User = "root",
                 Password = "password",
                 WebhookUrl = "",
-                WebhookInterval = 720 // Default to 12 hours
+                WebhookInterval = 720, // Default to 12 hours
+                TableName = "player_stats",
+                LBTableName = "leaderboard"
             }, true);
         }
 
@@ -124,7 +128,7 @@ namespace Oxide.Plugins
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = "SELECT * FROM player_stats";
+                string query = $"SELECT * FROM {config.TableName}";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     using (var reader = cmd.ExecuteReader())
@@ -164,7 +168,7 @@ namespace Oxide.Plugins
                 {
                     var playerId = entry.Key;
                     var data = entry.Value;
-                    string query = $"REPLACE INTO player_stats (PlayerId, PVPKills, PVPDistance, PVEKills, SleepersKilled, HeadShots, Deaths, Suicides, KDR, HeliKills, APCKills, RocketsLaunched, TimePlayed) " +
+                    string query = $"REPLACE INTO {config.TableName} (PlayerId, PVPKills, PVPDistance, PVEKills, SleepersKilled, HeadShots, Deaths, Suicides, KDR, HeliKills, APCKills, RocketsLaunched, TimePlayed) " +
                                    $"VALUES ('{playerId}', {data.PVPKills}, {data.PVPDistance}, {data.PVEKills}, {data.SleepersKilled}, {data.HeadShots}, {data.Deaths}, {data.Suicides}, {data.KDR}, {data.HeliKills}, {data.APCKills}, {data.RocketsLaunched}, {data.TimePlayed})";
                     using (var cmd = new MySqlCommand(query, connection))
                     {
@@ -383,7 +387,7 @@ namespace Oxide.Plugins
             using (var connection = new MySqlConnection(connectionString))
             {
                 connection.Open();
-                string query = $"DELETE FROM player_stats WHERE PlayerId = '{playerId}'";
+                string query = $"DELETE FROM {config.TableName} WHERE PlayerId = '{playerId}'";
                 using (var cmd = new MySqlCommand(query, connection))
                 {
                     cmd.ExecuteNonQuery();
