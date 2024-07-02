@@ -8,7 +8,7 @@ StatTracker is a Rust plugin that tracks various player statistics and stores th
 
 ## Version
 
-- 1.1.8
+- 1.1.9
 
 ## Description
 
@@ -43,13 +43,16 @@ The following permission is used by StatTracker:
 ## Default Configuration
 ```json
 {
-  "UseRemoteDatabase": false,
-  "Host": "localhost",
-  "Port": 3306,
   "Database": "rust",
-  "User": "root",
+  "Host": "localhost",
+  "LBTableName": "leaderboard",
   "Password": "password",
-  "WebhookUrl": ""
+  "Port": 3306,
+  "TableName": "player_stats",
+  "User": "root",
+  "UseRemoteDatabase": false,
+  "WebhookInterval": 720,
+  "WebhookUrl": "https://discord.com/api/webhooks/.................."
 }
 ```
 
